@@ -6,5 +6,5 @@ import org.springframework.test.context.web.WebAppConfiguration;
 
 @RunWith(SpringRunner.class)
 public class TimelineControllerTests {
-	
+	;
 }

@@ -1,6 +1,6 @@
 package me.timeline.controller;
 
-public class UserInfo {
+public class SignatureInfo {
 	private String email;
 	private String password;
 	
