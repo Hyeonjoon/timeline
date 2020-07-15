@@ -15,8 +15,8 @@ public class TimelineController {
 	TimelineServiceImpl TimelineService;
 	
 	@PostMapping(path="/signup")
-	public SignatureInfoDTO SignUp(@RequestBody SignatureInfo userinfo) {
-		SignatureInfoDTO success = TimelineService.signUpSucceed(userinfo.getEmail(), userinfo.getPassword());
+	public boolean SignUp(@RequestBody SignatureInfo userinfo) {
+		boolean success = TimelineService.signUpSucceed(userinfo.getEmail(), userinfo.getPassword());
 		return success;
 	}
 	

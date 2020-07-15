@@ -7,5 +7,5 @@ import org.springframework.stereotype.Service;
 import me.timeline.dto.SignatureInfoDTO;
 
 public interface TimelineService  {
-	public SignatureInfoDTO signUpSucceed(String email, String password);
+	public boolean signUpSucceed(String email, String password);
 }
