@@ -1,24 +1,41 @@
 package me.timeline.dto;
 
 public class SignatureInfoDTO {
-	private String userName = null;
-	private int userId = -1;
+	private String email;
+	private String nickname;
+	private String password;
+	private String provider;
 	
-	public String getUserName() {
-		return userName;
+	
+	public String getEmail() {
+		return email;
 	}
 	
-	public int getUserId() {
-		return userId;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 	
-	public void setUserName(String userName) {
-		this.userName = userName;
-		return;
+	public String getNickname() {
+		return nickname;
 	}
 	
-	public void setUserId(int id) {
-		this.userId = id;
-		return;
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
+	}
+	
+	public String getPassword() {
+		return password;
+	}
+	
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	public String getProvider() {
+		return provider;
+	}
+	
+	public void setProvider(String provider) {
+		this.provider = provider;
 	}
 }

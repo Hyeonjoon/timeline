@@ -15,14 +15,14 @@ public class TimelineController {
 	TimelineServiceImpl TimelineService;
 	
 	@PostMapping(path="/signup")
-	public boolean SignUp(@RequestBody SignatureInfo userinfo) {
-		boolean success = TimelineService.signUpSucceed(userinfo.getEmail(), userinfo.getPassword());
-		return success;
+	public boolean SignUp(@RequestBody SignatureInfoDTO signatureInfoDTO) {
+		boolean signUpSucceed = TimelineService.signUp(signatureInfoDTO);
+		return signUpSucceed;
 	}
 	
 	@PostMapping(path="/signin")
-	public SignatureInfo SignIn(@RequestBody SignatureInfo userinfo) {
-		return userinfo;
+	public SignatureInfoDTO SignIn(@RequestBody SignatureInfoDTO signatureInfoDTO) {
+		return signatureInfoDTO;
 	}
 	
 }
