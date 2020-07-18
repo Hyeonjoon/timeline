@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.timeline.dto.SignatureInfoDTO;
+import me.timeline.dto.SignInRequestDTO;
+import me.timeline.dto.SignInResponseDTO;
+import me.timeline.dto.SignUpRequestDTO;
+import me.timeline.dto.SignUpResponseDTO;
 import me.timeline.service.TimelineServiceImpl;
 
 @RestController
@@ -15,14 +18,13 @@ public class TimelineController {
 	TimelineServiceImpl TimelineService;
 	
 	@PostMapping(path="/signup")
-	public boolean SignUp(@RequestBody SignatureInfoDTO signatureInfoDTO) {
-		boolean signUpSucceed = TimelineService.signUp(signatureInfoDTO);
-		return signUpSucceed;
+	public SignUpResponseDTO SignUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
+		return TimelineService.SignUp(signUpRequestDTO);
 	}
 	
 	@PostMapping(path="/signin")
-	public SignatureInfoDTO SignIn(@RequestBody SignatureInfoDTO signatureInfoDTO) {
-		return signatureInfoDTO;
+	public SignInResponseDTO SignIn(@RequestBody SignInRequestDTO signInRequestDTO) {
+		return TimelineService.SignIn(signInRequestDTO);
 	}
 	
 }

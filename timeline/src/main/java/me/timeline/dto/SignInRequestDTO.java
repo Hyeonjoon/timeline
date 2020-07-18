@@ -1,11 +1,9 @@
 package me.timeline.dto;
 
-public class SignatureInfoDTO {
+public class SignInRequestDTO {
 	private String email;
-	private String nickname;
 	private String password;
 	private String provider;
-	
 	
 	public String getEmail() {
 		return email;
@@ -13,14 +11,6 @@ public class SignatureInfoDTO {
 	
 	public void setEmail(String email) {
 		this.email = email;
-	}
-	
-	public String getNickname() {
-		return nickname;
-	}
-	
-	public void setNickname(String nickname) {
-		this.nickname = nickname;
 	}
 	
 	public String getPassword() {
