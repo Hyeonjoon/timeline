@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import me.timeline.dto.JwtInputDTO;
 import me.timeline.dto.SignInRequestDTO;
 import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
@@ -28,6 +29,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	AuthProviderRepository authProviderRepository;
+	
+	@Autowired
+	JwtService jwtService;
 	
 	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 	
@@ -89,6 +93,7 @@ public class TimelineServiceImpl implements TimelineService {
 		Optional<User> userNullable = userRepository.findByEmail(signInRequestDTO.getEmail());
 		if (!userNullable.isPresent()) {
 			signInResponseDTO.setSuccess(false);
+			signInResponseDTO.setJwtToken("");
 			return signInResponseDTO;
 		}
 		User user = userNullable.get();
@@ -99,16 +104,22 @@ public class TimelineServiceImpl implements TimelineService {
 		Optional<SignatureInformation> signatureInformationNullable = signatureInformationRepository.findByUser_IdAndAuthProvider_Id(user.getId(), authProvider.getId());
 		if (!signatureInformationNullable.isPresent()) {
 			signInResponseDTO.setSuccess(false);
+			signInResponseDTO.setJwtToken("");
 			return signInResponseDTO;
 		}
 		SignatureInformation signatureInformation = signatureInformationNullable.get();
 		
 		/* Check if given password matches the stored password in database. */
 		if (passwordEncoder.matches(signInRequestDTO.getPassword(), signatureInformation.getPasskey())) {
+			/* Create a Jwt token for the user. */
+			JwtInputDTO jwtInputDTO = new JwtInputDTO();
+			jwtInputDTO.setId(user.getId());
+			signInResponseDTO.setJwtToken(jwtService.create(jwtInputDTO));
 			signInResponseDTO.setSuccess(true);
 		}
 		else {
 			signInResponseDTO.setSuccess(false);
+			signInResponseDTO.setJwtToken("");
 		}
 		
 		return signInResponseDTO;

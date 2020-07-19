@@ -14,6 +14,7 @@ import me.timeline.service.TimelineServiceImpl;
 
 @RestController
 public class TimelineController {
+	
 	@Autowired
 	TimelineServiceImpl TimelineService;
 	
@@ -27,5 +28,9 @@ public class TimelineController {
 		return TimelineService.SignIn(signInRequestDTO);
 	}
 	
+	@GetMapping(path="/hello")
+	public String Hello() {
+		return "hello";
+	}
 }
 
