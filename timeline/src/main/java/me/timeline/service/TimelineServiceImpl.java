@@ -59,7 +59,7 @@ public class TimelineServiceImpl implements TimelineService {
 			User user = new User();
 			user.setEmail(signUpRequestDTO.getEmail());
 			user.setNickname(signUpRequestDTO.getNickname());
-			user.initSignatureInformation();
+			user.initSignatureInformationList();
 			
 			/* Get a AuthProvider entity with given type. 
 			 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
@@ -152,7 +152,7 @@ public class TimelineServiceImpl implements TimelineService {
 		postResponseDTO.setSuccess(true);
 		postResponseDTO.setContent(postRequestDTO.getContent());
 		postResponseDTO.setPostTime(new Date());
-
+		
 		return postResponseDTO;
 	}
 }

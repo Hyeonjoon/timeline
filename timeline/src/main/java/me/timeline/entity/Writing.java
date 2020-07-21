@@ -1,5 +1,7 @@
 package me.timeline.entity;
 
+import java.util.Date;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -10,22 +12,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class SignatureInformation {
+public class Writing {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
-	
-	private int providerUserId;
-	
-	private String passkey;
 	
 	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
 	private User user;
 	
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "provider_id")
-	private AuthProvider authProvider;
+	private String content;
+	
+	private Date createdAt;
 	
 	public int getId() {
 		return id;
@@ -35,20 +33,20 @@ public class SignatureInformation {
 		this.id = id;
 	}
 	
-	public int getProviderUserId() {
-		return providerUserId;
+	public String getContent() {
+		return content;
 	}
 	
-	public void setProviderUserId(int providerUserId) {
-		this.providerUserId = providerUserId;
+	public void setContent(String content) {
+		this.content = content;
 	}
 	
-	public String getPasskey() {
-		return passkey;
+	public Date getCreatedAt() {
+		return createdAt;
 	}
 	
-	public void setPasskey(String passkey) {
-		this.passkey = passkey;
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
 	}
 	
 	public User getUser() {
@@ -57,13 +55,5 @@ public class SignatureInformation {
 	
 	public void setUser(User user) {
 		this.user = user;
-	}
-	
-	public AuthProvider getAuthProvider() {
-		return authProvider;
-	}
-	
-	public void setAuthProvider(AuthProvider authProvider) {
-		this.authProvider = authProvider;
 	}
 }

@@ -17,10 +17,17 @@ public class User {
 	private int id;
 	
 	private String email;
+	
 	private String nickname;
 	
-	@OneToMany(mappedBy = "user", cascade= CascadeType.ALL)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<SignatureInformation> signatureInformationList;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Writing> writingList;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Comment> commentList;
 	
 	public int getId() {
 		return id;
@@ -46,7 +53,7 @@ public class User {
 		this.nickname = nickname;
 	}
 	
-	public void initSignatureInformation() {
+	public void initSignatureInformationList() {
 		this.signatureInformationList = new ArrayList<>();
 	}
 	
@@ -54,4 +61,19 @@ public class User {
 		this.signatureInformationList.add(signatureInformation);
 	}
 	
+	public void initWritingList() {
+		this.writingList = new ArrayList<>();
+	}
+	
+	public void addWriting(Writing writing) {
+		this.writingList.add(writing);
+	}
+	
+	public void initCommentList() {
+		this.commentList =new ArrayList<>();
+	}
+	
+	public void addComment(Comment comment) {
+		this.commentList.add(comment);
+	}
 }
