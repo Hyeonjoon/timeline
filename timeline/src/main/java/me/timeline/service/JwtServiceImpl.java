@@ -17,7 +17,7 @@ public class JwtServiceImpl implements JwtService{
 	private String secret;
 	
 	@Override
-	public String create(JwtInputDTO jwtInputDTO){
+	public String JwtCreate(JwtInputDTO jwtInputDTO){
 		String jwt = Jwts.builder()
 						 .setHeaderParam("typ", "JWT")
 						 .setSubject(jwtInputDTO.getIdString())
@@ -27,7 +27,7 @@ public class JwtServiceImpl implements JwtService{
 	}
 	
 	@Override
-	public boolean isUsable(String jwt) {
+	public boolean JwtIsUsable(String jwt) {
 		try {
 			Jws<Claims> claims = Jwts.parser()
 					  .setSigningKey(secret)
@@ -36,5 +36,9 @@ public class JwtServiceImpl implements JwtService{
 		} catch (Exception e) {
 			throw new UnauthorizedException();
 		}
+	}
+	
+	public int JwtGetUserId(String jwt) {
+		return Integer.parseInt(Jwts.parser().setSigningKey(secret).parseClaimsJws(jwt).getBody().getSubject());
 	}
 }

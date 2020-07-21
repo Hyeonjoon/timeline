@@ -4,8 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import me.timeline.dto.PostRequestDTO;
+import me.timeline.dto.PostResponseDTO;
 import me.timeline.dto.SignInRequestDTO;
 import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
@@ -28,9 +31,9 @@ public class TimelineController {
 		return TimelineService.SignIn(signInRequestDTO);
 	}
 	
-	@GetMapping(path="/hello")
-	public String Hello() {
-		return "hello";
+	@PostMapping(path="/postwriting")
+	public PostResponseDTO PostWriting(@RequestBody PostRequestDTO postRequestDTO, @RequestHeader (name="Authorization") String jwtToken) {
+		return TimelineService.PostWriting(postRequestDTO, jwtToken);
 	}
 }
 

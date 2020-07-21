@@ -22,7 +22,7 @@ public class JwtInterceptor implements HandlerInterceptor{
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		final String token = request.getHeader(HEADER_AUTH);
 		try {
-			boolean isValid = token != null && jwtService.isUsable(token);
+			boolean isValid = token != null && jwtService.JwtIsUsable(token);
 			if (!isValid) {
 				throw new UnauthorizedException();
 			}

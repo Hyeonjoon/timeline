@@ -1,5 +1,6 @@
 package me.timeline.service;
 
+import java.util.Date;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import me.timeline.dto.JwtInputDTO;
+import me.timeline.dto.PostRequestDTO;
+import me.timeline.dto.PostResponseDTO;
 import me.timeline.dto.SignInRequestDTO;
 import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
@@ -35,9 +38,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 	
-	/* signUp
-	 * - Input: signUpRequestDTO
-	 * - Output: boolean
+	/* SignUp
+	 * - Input: SignUpRequestDTO
+	 * - Output: SignUpResponseDTO
 	 * Check if given email address is already exists.
 	 * If it is, return false, and if not, create entities with given information and save them in the database.
 	 */
@@ -83,6 +86,12 @@ public class TimelineServiceImpl implements TimelineService {
 		}
 	}
 	
+	/* SignIn
+	 * - Input: SignInRequestDTO
+	 * - Output: SignInResponseDTO
+	 * Check if given email and password with given provider type is registered in the database.
+	 * If it is, return a Jwt token, and if not, reject the signing in.
+	 */
 	public SignInResponseDTO SignIn(SignInRequestDTO signInRequestDTO) {
 		/* Create a SignInResponseDTO object. */
 		SignInResponseDTO signInResponseDTO = new SignInResponseDTO();
@@ -114,7 +123,7 @@ public class TimelineServiceImpl implements TimelineService {
 			/* Create a Jwt token for the user. */
 			JwtInputDTO jwtInputDTO = new JwtInputDTO();
 			jwtInputDTO.setId(user.getId());
-			signInResponseDTO.setJwtToken(jwtService.create(jwtInputDTO));
+			signInResponseDTO.setJwtToken(jwtService.JwtCreate(jwtInputDTO));
 			signInResponseDTO.setSuccess(true);
 		}
 		else {
@@ -123,5 +132,27 @@ public class TimelineServiceImpl implements TimelineService {
 		}
 		
 		return signInResponseDTO;
+	}
+	
+	public PostResponseDTO PostWriting(PostRequestDTO postRequestDTO, String jwtToken) {
+		/* Create a new PostResponseDTO object. */
+		PostResponseDTO postResponseDTO = new PostResponseDTO();
+		
+		/* Check if given content has length exceeding 150 characters. */
+		if (postRequestDTO.getContent().length() > 150) {
+			postResponseDTO.setSuccess(false);
+			postResponseDTO.setContent("");
+			postResponseDTO.setPostTime(null);
+			return postResponseDTO;
+		}
+		
+		/* Retrieve user id from Jwt token. */
+		int userId = jwtService.JwtGetUserId(jwtToken);
+		
+		postResponseDTO.setSuccess(true);
+		postResponseDTO.setContent(postRequestDTO.getContent());
+		postResponseDTO.setPostTime(new Date());
+
+		return postResponseDTO;
 	}
 }
