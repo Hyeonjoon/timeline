@@ -10,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 @Entity
 public class Writing {
@@ -23,6 +25,7 @@ public class Writing {
 	
 	private String content;
 	
+	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
 	
 	public int getId() {

@@ -17,9 +17,11 @@ import me.timeline.dto.SignUpResponseDTO;
 import me.timeline.entity.AuthProvider;
 import me.timeline.entity.SignatureInformation;
 import me.timeline.entity.User;
+import me.timeline.entity.Writing;
 import me.timeline.repository.AuthProviderRepository;
 import me.timeline.repository.SignatureInformationRepository;
 import me.timeline.repository.UserRepository;
+import me.timeline.repository.WritingRepository;
 
 @Service("TimelineService")
 public class TimelineServiceImpl implements TimelineService {
@@ -32,6 +34,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	AuthProviderRepository authProviderRepository;
+	
+	@Autowired
+	WritingRepository writingRepository;
 	
 	@Autowired
 	JwtService jwtService;
@@ -60,6 +65,8 @@ public class TimelineServiceImpl implements TimelineService {
 			user.setEmail(signUpRequestDTO.getEmail());
 			user.setNickname(signUpRequestDTO.getNickname());
 			user.initSignatureInformationList();
+			user.initWritingList();
+			user.initCommentList();
 			
 			/* Get a AuthProvider entity with given type. 
 			 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
@@ -133,7 +140,12 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		return signInResponseDTO;
 	}
-	
+	/* PostWriting
+	 * - Input: PostRequestDTO, jwtToken
+	 * - Output: PostResponseDTO
+	 * Check if given writing content has length exceeding 150 characters.
+	 * If it is, reject the request, and if not, retrieve user id from Jwt token and save the content in database.
+	 */
 	public PostResponseDTO PostWriting(PostRequestDTO postRequestDTO, String jwtToken) {
 		/* Create a new PostResponseDTO object. */
 		PostResponseDTO postResponseDTO = new PostResponseDTO();
@@ -146,12 +158,25 @@ public class TimelineServiceImpl implements TimelineService {
 			return postResponseDTO;
 		}
 		
-		/* Retrieve user id from Jwt token. */
-		int userId = jwtService.JwtGetUserId(jwtToken);
+		/* Retrieve user id from Jwt token, and create a new Writing entity object. */
+		Writing writing = new Writing();
+		Date now = new Date();
+		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
+		writing.setContent(postRequestDTO.getContent());
+		writing.setCreatedAt(now);
 		
+		/* Create a referential relationship between a Writing entity and User entity. */
+		writing.setUser(user);
+		user.addWriting(writing);
+		
+		/* Save the data in database. */
+		writingRepository.save(writing);
+		userRepository.save(user);
+		
+		/* Construct the PostResponseDTO object and return it. */
 		postResponseDTO.setSuccess(true);
 		postResponseDTO.setContent(postRequestDTO.getContent());
-		postResponseDTO.setPostTime(new Date());
+		postResponseDTO.setPostTime(now);
 		
 		return postResponseDTO;
 	}
