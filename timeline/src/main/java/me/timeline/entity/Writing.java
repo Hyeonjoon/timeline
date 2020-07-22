@@ -1,6 +1,8 @@
 package me.timeline.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -10,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -27,6 +30,9 @@ public class Writing {
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date createdAt;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<Comment> commentList;
 	
 	public int getId() {
 		return id;
@@ -58,5 +64,13 @@ public class Writing {
 	
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public void initCommentList() {
+		this.commentList =new ArrayList<>();
+	}
+	
+	public void addComment(Comment comment) {
+		this.commentList.add(comment);
 	}
 }

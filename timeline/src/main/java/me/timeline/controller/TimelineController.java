@@ -7,33 +7,40 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.timeline.dto.PostRequestDTO;
-import me.timeline.dto.PostResponseDTO;
+import me.timeline.dto.PostCommentRequestDTO;
+import me.timeline.dto.PostCommentResponseDTO;
+import me.timeline.dto.PostWritingRequestDTO;
+import me.timeline.dto.PostWritingResponseDTO;
 import me.timeline.dto.SignInRequestDTO;
 import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
 import me.timeline.dto.SignUpResponseDTO;
-import me.timeline.service.TimelineServiceImpl;
+import me.timeline.service.TimelineService;
 
 @RestController
 public class TimelineController {
 	
 	@Autowired
-	TimelineServiceImpl TimelineService;
+	TimelineService timelineService;
 	
 	@PostMapping(path="/signup")
 	public SignUpResponseDTO SignUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
-		return TimelineService.SignUp(signUpRequestDTO);
+		return timelineService.SignUp(signUpRequestDTO);
 	}
 	
 	@PostMapping(path="/signin")
 	public SignInResponseDTO SignIn(@RequestBody SignInRequestDTO signInRequestDTO) {
-		return TimelineService.SignIn(signInRequestDTO);
+		return timelineService.SignIn(signInRequestDTO);
 	}
 	
 	@PostMapping(path="/postwriting")
-	public PostResponseDTO PostWriting(@RequestBody PostRequestDTO postRequestDTO, @RequestHeader (name="Authorization") String jwtToken) {
-		return TimelineService.PostWriting(postRequestDTO, jwtToken);
+	public PostWritingResponseDTO PostWriting(@RequestBody PostWritingRequestDTO postWritingRequestDTO, @RequestHeader (name="Authorization") String jwtToken) {
+		return timelineService.PostWriting(postWritingRequestDTO, jwtToken);
+	}
+	
+	@PostMapping(path="/postcomment")
+	public PostCommentResponseDTO PostComment(@RequestBody PostCommentRequestDTO postCommentRequestDTO, @RequestHeader (name="Authorization") String jwtToken) {
+		return timelineService.PostComment(postCommentRequestDTO, jwtToken);
 	}
 }
 

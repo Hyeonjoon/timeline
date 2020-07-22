@@ -8,17 +8,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import me.timeline.dto.JwtInputDTO;
-import me.timeline.dto.PostRequestDTO;
-import me.timeline.dto.PostResponseDTO;
+import me.timeline.dto.PostCommentRequestDTO;
+import me.timeline.dto.PostCommentResponseDTO;
+import me.timeline.dto.PostWritingRequestDTO;
+import me.timeline.dto.PostWritingResponseDTO;
 import me.timeline.dto.SignInRequestDTO;
 import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
 import me.timeline.dto.SignUpResponseDTO;
 import me.timeline.entity.AuthProvider;
+import me.timeline.entity.Comment;
 import me.timeline.entity.SignatureInformation;
 import me.timeline.entity.User;
 import me.timeline.entity.Writing;
 import me.timeline.repository.AuthProviderRepository;
+import me.timeline.repository.CommentRepository;
 import me.timeline.repository.SignatureInformationRepository;
 import me.timeline.repository.UserRepository;
 import me.timeline.repository.WritingRepository;
@@ -37,6 +41,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	WritingRepository writingRepository;
+	
+	@Autowired
+	CommentRepository commentRepository;
 	
 	@Autowired
 	JwtService jwtService;
@@ -140,30 +147,34 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		return signInResponseDTO;
 	}
+	
 	/* PostWriting
-	 * - Input: PostRequestDTO, jwtToken
-	 * - Output: PostResponseDTO
+	 * - Input: PostWritingRequestDTO, jwtToken
+	 * - Output: postWritingResponseDTO
 	 * Check if given writing content has length exceeding 150 characters.
 	 * If it is, reject the request, and if not, retrieve user id from Jwt token and save the content in database.
 	 */
-	public PostResponseDTO PostWriting(PostRequestDTO postRequestDTO, String jwtToken) {
-		/* Create a new PostResponseDTO object. */
-		PostResponseDTO postResponseDTO = new PostResponseDTO();
+	public PostWritingResponseDTO PostWriting(PostWritingRequestDTO postWritingRequestDTO, String jwtToken) {
+		/* Create a new postWritingResponseDTO object. */
+		PostWritingResponseDTO postWritingResponseDTO = new PostWritingResponseDTO();
 		
 		/* Check if given content has length exceeding 150 characters. */
-		if (postRequestDTO.getContent().length() > 150) {
-			postResponseDTO.setSuccess(false);
-			postResponseDTO.setContent("");
-			postResponseDTO.setPostTime(null);
-			return postResponseDTO;
+		if (postWritingRequestDTO.getContent().length() > 150) {
+			postWritingResponseDTO.setSuccess(false);
+			postWritingResponseDTO.setContent("");
+			postWritingResponseDTO.setPostTime(null);
+			return postWritingResponseDTO;
 		}
 		
-		/* Retrieve user id from Jwt token, and create a new Writing entity object. */
+		/* Retrieve user id from Jwt token, and get the User entity with that user id out of  the database. */
+		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
+		
+		/* Create a new Writing entity object. */
 		Writing writing = new Writing();
 		Date now = new Date();
-		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
-		writing.setContent(postRequestDTO.getContent());
+		writing.setContent(postWritingRequestDTO.getContent());
 		writing.setCreatedAt(now);
+		writing.initCommentList();
 		
 		/* Create a referential relationship between a Writing entity and User entity. */
 		writing.setUser(user);
@@ -173,11 +184,51 @@ public class TimelineServiceImpl implements TimelineService {
 		writingRepository.save(writing);
 		userRepository.save(user);
 		
-		/* Construct the PostResponseDTO object and return it. */
-		postResponseDTO.setSuccess(true);
-		postResponseDTO.setContent(postRequestDTO.getContent());
-		postResponseDTO.setPostTime(now);
+		/* Construct the postWritingResponseDTO object and return it. */
+		postWritingResponseDTO.setSuccess(true);
+		postWritingResponseDTO.setContent(postWritingRequestDTO.getContent());
+		postWritingResponseDTO.setPostTime(now);
 		
-		return postResponseDTO;
+		return postWritingResponseDTO;
+	}
+	
+	/* PostComment
+	 * - Input: postCommentRequestDTO, jwtToken
+	 * - Output: postCommentResponseDTO
+	 * Retrieve user id from Jwt token and save the content in database.
+	 */
+	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken) {
+		/* Create a new postCommentResponseDTO. */
+		PostCommentResponseDTO postCommentResponseDTO = new PostCommentResponseDTO();
+		
+		/* Retrieve user id from Jwt token, and get the User entity with that user id out of the database. 
+		 * And also get the Writing entity out of the database. */
+		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
+		Writing writing = writingRepository.findById(postCommentRequestDTO.getWritingId()).get();
+		
+		/* Create a new Comment object. */
+		Comment comment = new Comment();
+		Date now = new Date();
+		comment.setContent(postCommentRequestDTO.getContent());
+		comment.setCreatedAt(now);
+		
+		/* Create a referential relationships among entities. */
+		comment.setUser(user);
+		comment.setWriting(writing);
+		user.addComment(comment);
+		writing.addComment(comment);
+		
+		/* Save the data in database. */
+		commentRepository.save(comment);
+		userRepository.save(user);
+		writingRepository.save(writing);
+		
+		/* Construct the PostCommentResponseDTO object and return it. */
+		postCommentResponseDTO.setSuccess(true);
+		postCommentResponseDTO.setWritingId(postCommentRequestDTO.getWritingId());
+		postCommentResponseDTO.setContent(postCommentRequestDTO.getContent());
+		postCommentResponseDTO.setPostTime(now);
+		
+		return postCommentResponseDTO;
 	}
 }

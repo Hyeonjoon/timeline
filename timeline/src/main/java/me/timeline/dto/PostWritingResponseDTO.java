@@ -2,7 +2,7 @@ package me.timeline.dto;
 
 import java.util.Date;
 
-public class PostResponseDTO {
+public class PostWritingResponseDTO {
 	
 	private boolean success;
 	private String content;

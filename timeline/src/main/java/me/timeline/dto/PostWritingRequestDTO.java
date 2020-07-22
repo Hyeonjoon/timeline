@@ -1,6 +1,6 @@
 package me.timeline.dto;
 
-public class PostRequestDTO {
+public class PostWritingRequestDTO {
 	
 	private String content;
 	
