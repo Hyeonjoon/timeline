@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import me.timeline.dto.FollowRequestDTO;
@@ -24,6 +25,7 @@ import me.timeline.entity.Following;
 import me.timeline.entity.SignatureInformation;
 import me.timeline.entity.User;
 import me.timeline.entity.Writing;
+import me.timeline.exception.DatabaseRelatedException;
 import me.timeline.repository.AuthProviderRepository;
 import me.timeline.repository.CommentRepository;
 import me.timeline.repository.FollowingRepository;
@@ -63,6 +65,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * Check if given email address is already exists.
 	 * If it is, return false, and if not, create entities with given information and save them in the database.
 	 */
+	@Transactional
 	public SignUpResponseDTO SignUp(SignUpRequestDTO signUpRequestDTO) {
 		/* Create a SignUpResponseDTO object. */
 		SignUpResponseDTO signUpResponseDTO = new SignUpResponseDTO();
@@ -73,40 +76,39 @@ public class TimelineServiceImpl implements TimelineService {
 			signUpResponseDTO.setSuccess(false);
 			return signUpResponseDTO;
 		}
-		else {
-			/* Create a new User entity. */
-			User user = new User();
-			user.setEmail(signUpRequestDTO.getEmail());
-			user.setNickname(signUpRequestDTO.getNickname());
-			user.initSignatureInformationList();
-			user.initWritingList();
-			user.initCommentList();
-			user.initFollowingList();
-			user.initFollowerList();
-			
-			/* Get a AuthProvider entity with given type. 
-			 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
-			AuthProvider authProvider = authProviderRepository.findByType(signUpRequestDTO.getProvider()).get();
-			
-			/* Create a new SignatureInformation entity. */
-			SignatureInformation signatureInformation = new SignatureInformation();
-			signatureInformation.setProviderUserId(0);
-			signatureInformation.setPasskey(passwordEncoder.encode(signUpRequestDTO.getPassword()));
-			
-			/* Create some referential relationships among entities. */
-			signatureInformation.setUser(user);
-			signatureInformation.setAuthProvider(authProvider);
-			user.addSignatureInformation(signatureInformation);
-			authProvider.addSignatureInformation(signatureInformation);
-			
-			/* Save the data in database. */
-			userRepository.save(user);
-			authProviderRepository.save(authProvider);
-			signatureInformationRepository.save(signatureInformation);
-			
-			signUpResponseDTO.setSuccess(true);
-			return signUpResponseDTO;
-		}
+		
+		/* Create a new User entity. */
+		User user = new User();
+		user.setEmail(signUpRequestDTO.getEmail());
+		user.setNickname(signUpRequestDTO.getNickname());
+		user.initSignatureInformationList();
+		user.initWritingList();
+		user.initCommentList();
+		user.initFollowingList();
+		user.initFollowerList();
+		
+		/* Get a AuthProvider entity with given type. 
+		 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
+		AuthProvider authProvider = authProviderRepository.findByType(signUpRequestDTO.getProvider()).get();
+		
+		/* Create a new SignatureInformation entity. */
+		SignatureInformation signatureInformation = new SignatureInformation();
+		signatureInformation.setProviderUserId(0);
+		signatureInformation.setPasskey(passwordEncoder.encode(signUpRequestDTO.getPassword()));
+		
+		/* Create some referential relationships among entities. */
+		signatureInformation.setUser(user);
+		signatureInformation.setAuthProvider(authProvider);
+		user.addSignatureInformation(signatureInformation);
+		authProvider.addSignatureInformation(signatureInformation);
+		
+		/* Save the data in database. */
+		userRepository.save(user);
+		authProviderRepository.save(authProvider);
+		signatureInformationRepository.save(signatureInformation);
+		
+		signUpResponseDTO.setSuccess(true);
+		return signUpResponseDTO;
 	}
 	
 	/* SignIn
@@ -115,6 +117,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * Check if given email and password with given provider type is registered in the database.
 	 * If it is, return a Jwt token, and if not, reject the signing in.
 	 */
+	@Transactional(readOnly = true)
 	public SignInResponseDTO SignIn(SignInRequestDTO signInRequestDTO) {
 		/* Create a SignInResponseDTO object. */
 		SignInResponseDTO signInResponseDTO = new SignInResponseDTO();
@@ -163,6 +166,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * Check if given writing content has length exceeding 150 characters.
 	 * If it is, reject the request, and if not, retrieve user id from Jwt token and save the content in database.
 	 */
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public PostWritingResponseDTO PostWriting(PostWritingRequestDTO postWritingRequestDTO, String jwtToken) {
 		/* Create a new postWritingResponseDTO object. */
 		PostWritingResponseDTO postWritingResponseDTO = new PostWritingResponseDTO();
@@ -176,7 +180,11 @@ public class TimelineServiceImpl implements TimelineService {
 		}
 		
 		/* Retrieve user id from Jwt token, and get the User entity with that user id out of  the database. */
-		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
+		Optional <User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException();
+		}
+		User user = userNullable.get();
 		
 		/* Create a new Writing entity object. */
 		Writing writing = new Writing();
@@ -191,7 +199,6 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		/* Save the data in database. */
 		writingRepository.save(writing);
-		userRepository.save(user);
 		
 		/* Construct the postWritingResponseDTO object and return it. */
 		postWritingResponseDTO.setSuccess(true);
@@ -206,14 +213,20 @@ public class TimelineServiceImpl implements TimelineService {
 	 * - Output: postCommentResponseDTO
 	 * Retrieve user id from Jwt token and save the content in database.
 	 */
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken) {
 		/* Create a new postCommentResponseDTO. */
 		PostCommentResponseDTO postCommentResponseDTO = new PostCommentResponseDTO();
 		
 		/* Retrieve user id from Jwt token, and get the User entity with that user id out of the database. 
 		 * And also get the Writing entity out of the database. */
-		User user = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
-		Writing writing = writingRepository.findById(postCommentRequestDTO.getWritingId()).get();
+		Optional <User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		Optional <Writing> writingNullable = writingRepository.findById(postCommentRequestDTO.getWritingId());
+		if (!userNullable.isPresent() || !writingNullable.isPresent()) {
+			throw new DatabaseRelatedException();
+		}
+		User user = userNullable.get();
+		Writing writing = writingNullable.get();
 		
 		/* Create a new Comment object. */
 		Comment comment = new Comment();
@@ -229,8 +242,6 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		/* Save the data in database. */
 		commentRepository.save(comment);
-		userRepository.save(user);
-		writingRepository.save(writing);
 		
 		/* Construct the PostCommentResponseDTO object and return it. */
 		postCommentResponseDTO.setSuccess(true);
@@ -241,14 +252,20 @@ public class TimelineServiceImpl implements TimelineService {
 		return postCommentResponseDTO;
 	}
 	
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken) {
 		/* Create a new FollowResponseDTO object. */
 		FollowResponseDTO followResponseDTO = new FollowResponseDTO();
 		
 		/* Retrieve user id from Jwt token and get the User entity for that user id.
 		 * And also get the target User's entity. */
-		User follower = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
-		User followee = userRepository.findById(followRequestDTO.getTargetId()).get();
+		Optional <User> followerNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		Optional <User> followeeNullable = userRepository.findById(followRequestDTO.getTargetId());
+		if (!followerNullable.isPresent() || !followeeNullable.isPresent()) {
+			throw new DatabaseRelatedException();
+		}
+		User follower = followerNullable.get();
+		User followee = followeeNullable.get();
 		
 		/* Create a new Following entity. */
 		Following following = new Following();
@@ -261,6 +278,9 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		/* Save the data in database. */
 		followingRepository.save(following);
+		
+		/* Construct the FollowResponseDTO object and return it. */
+		followResponseDTO.setSuccess(true);
 		
 		return followResponseDTO;
 	}
