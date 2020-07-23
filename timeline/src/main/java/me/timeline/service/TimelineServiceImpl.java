@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import me.timeline.dto.FollowRequestDTO;
+import me.timeline.dto.FollowResponseDTO;
 import me.timeline.dto.JwtInputDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
@@ -18,11 +20,13 @@ import me.timeline.dto.SignUpRequestDTO;
 import me.timeline.dto.SignUpResponseDTO;
 import me.timeline.entity.AuthProvider;
 import me.timeline.entity.Comment;
+import me.timeline.entity.Following;
 import me.timeline.entity.SignatureInformation;
 import me.timeline.entity.User;
 import me.timeline.entity.Writing;
 import me.timeline.repository.AuthProviderRepository;
 import me.timeline.repository.CommentRepository;
+import me.timeline.repository.FollowingRepository;
 import me.timeline.repository.SignatureInformationRepository;
 import me.timeline.repository.UserRepository;
 import me.timeline.repository.WritingRepository;
@@ -44,6 +48,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	CommentRepository commentRepository;
+	
+	@Autowired
+	FollowingRepository followingRepository;
 	
 	@Autowired
 	JwtService jwtService;
@@ -74,6 +81,8 @@ public class TimelineServiceImpl implements TimelineService {
 			user.initSignatureInformationList();
 			user.initWritingList();
 			user.initCommentList();
+			user.initFollowingList();
+			user.initFollowerList();
 			
 			/* Get a AuthProvider entity with given type. 
 			 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
@@ -230,5 +239,29 @@ public class TimelineServiceImpl implements TimelineService {
 		postCommentResponseDTO.setPostTime(now);
 		
 		return postCommentResponseDTO;
+	}
+	
+	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken) {
+		/* Create a new FollowResponseDTO object. */
+		FollowResponseDTO followResponseDTO = new FollowResponseDTO();
+		
+		/* Retrieve user id from Jwt token and get the User entity for that user id.
+		 * And also get the target User's entity. */
+		User follower = userRepository.findById(jwtService.JwtGetUserId(jwtToken)).get();
+		User followee = userRepository.findById(followRequestDTO.getTargetId()).get();
+		
+		/* Create a new Following entity. */
+		Following following = new Following();
+		
+		/* Create referential relationships among entities. */
+		following.setFollower(follower);
+		following.setFollowee(followee);
+		follower.addFollowing(followee);
+		followee.addFollower(follower);
+		
+		/* Save the data in database. */
+		followingRepository.save(following);
+		
+		return followResponseDTO;
 	}
 }

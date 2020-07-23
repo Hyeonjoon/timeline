@@ -29,6 +29,12 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Comment> commentList;
 	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<User> followingList;
+	
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+	private List<User> followerList;
+	
 	public int getId() {
 		return id;
 	}
@@ -75,5 +81,21 @@ public class User {
 	
 	public void addComment(Comment comment) {
 		this.commentList.add(comment);
+	}
+	
+	public void initFollowingList() {
+		this.followingList = new ArrayList<>();
+	}
+	
+	public void addFollowing(User user) {
+		this.followingList.add(user);
+	}
+	
+	public void initFollowerList() {
+		this.followerList = new ArrayList<>();
+	}
+	
+	public void addFollower(User user) {
+		this.followerList.add(user);
 	}
 }

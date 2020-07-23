@@ -1,5 +1,7 @@
 package me.timeline.service;
 
+import me.timeline.dto.FollowRequestDTO;
+import me.timeline.dto.FollowResponseDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
 import me.timeline.dto.PostWritingRequestDTO;
@@ -14,4 +16,5 @@ public interface TimelineService  {
 	public SignInResponseDTO SignIn(SignInRequestDTO signInRequestDTO);
 	public PostWritingResponseDTO PostWriting(PostWritingRequestDTO postWritingRequestDTO, String jwtToken);
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken);
+	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken);
 }
