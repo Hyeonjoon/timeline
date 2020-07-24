@@ -273,8 +273,8 @@ public class TimelineServiceImpl implements TimelineService {
 		/* Create referential relationships among entities. */
 		following.setFollower(follower);
 		following.setFollowee(followee);
-		follower.addFollowing(followee);
-		followee.addFollower(follower);
+		follower.addFollowing(following);
+		followee.addFollower(following);
 		
 		/* Save the data in database. */
 		followingRepository.save(following);

@@ -29,11 +29,13 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private List<Comment> commentList;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	private List<User> followingList;
+	/* Following list has users who are followed by this user. Thus this user is a follower here. */
+	@OneToMany(mappedBy = "follower", cascade = CascadeType.ALL)
+	private List<Following> followingList;
 	
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-	private List<User> followerList;
+	/* Follower list has users who are following this user. Thus this user is a followee here. */
+	@OneToMany(mappedBy = "followee", cascade = CascadeType.ALL)
+	private List<Following> followerList;
 	
 	public int getId() {
 		return id;
@@ -87,15 +89,15 @@ public class User {
 		this.followingList = new ArrayList<>();
 	}
 	
-	public void addFollowing(User user) {
-		this.followingList.add(user);
+	public void addFollowing(Following following) {
+		this.followingList.add(following);
 	}
 	
 	public void initFollowerList() {
 		this.followerList = new ArrayList<>();
 	}
 	
-	public void addFollower(User user) {
-		this.followerList.add(user);
+	public void addFollower(Following following) {
+		this.followerList.add(following);
 	}
 }
