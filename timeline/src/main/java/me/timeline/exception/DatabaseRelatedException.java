@@ -7,8 +7,8 @@ public class DatabaseRelatedException extends RuntimeException{
 	private int status = 500;
 	private String exception = "DatabaseRelatedException";
 	
-	public DatabaseRelatedException() {
-		super("Fail to handle request because an exception related to database occurs. The request body may be manipulated.");
+	public DatabaseRelatedException(String message) {
+		super(message);
 	}
 	
 	public int getStatus() {

@@ -182,7 +182,7 @@ public class TimelineServiceImpl implements TimelineService {
 		/* Retrieve user id from Jwt token, and get the User entity with that user id out of  the database. */
 		Optional <User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		if (!userNullable.isPresent()) {
-			throw new DatabaseRelatedException();
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is not valid.");
 		}
 		User user = userNullable.get();
 		
@@ -222,8 +222,11 @@ public class TimelineServiceImpl implements TimelineService {
 		 * And also get the Writing entity out of the database. */
 		Optional <User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		Optional <Writing> writingNullable = writingRepository.findById(postCommentRequestDTO.getWritingId());
-		if (!userNullable.isPresent() || !writingNullable.isPresent()) {
-			throw new DatabaseRelatedException();
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
+		}
+		if (!writingNullable.isPresent()) {
+			throw new DatabaseRelatedException("The post id is invalid. It would be deleted.");
 		}
 		User user = userNullable.get();
 		Writing writing = writingNullable.get();
@@ -267,11 +270,19 @@ public class TimelineServiceImpl implements TimelineService {
 		 * And also get the target User's entity. */
 		Optional <User> followerNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		Optional <User> followeeNullable = userRepository.findById(followRequestDTO.getTargetId());
-		if (!followerNullable.isPresent() || !followeeNullable.isPresent()) {
-			throw new DatabaseRelatedException();
+		if (!followerNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
+		}
+		if (!followeeNullable.isPresent()) {
+			throw new DatabaseRelatedException("The id of user to follow is invalid.");
 		}
 		User follower = followerNullable.get();
 		User followee = followeeNullable.get();
+		
+		/* A user cannot follow or unfollow him/herself. */
+		if (follower.getId( ) == followee.getId()) {
+			throw new DatabaseRelatedException("A user cannot follow or unfollow him/herself.");
+		}
 		
 		/* Create a new Following entity. */
 		Following following = new Following();
@@ -304,16 +315,25 @@ public class TimelineServiceImpl implements TimelineService {
 		/* Get the User entities. */
 		Optional <User> followerNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		Optional <User> followeeNullable = userRepository.findById(followRequestDTO.getTargetId());
-		if (!followerNullable.isPresent() || !followeeNullable.isPresent()) {
-			throw new DatabaseRelatedException();
+		if (!followerNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
 		}
+		if (!followeeNullable.isPresent()) {
+			throw new DatabaseRelatedException("The id of user to unfollow is invalid.");
+		}
+		
 		User follower = followerNullable.get();
 		User followee = followeeNullable.get();
+		
+		/* A user cannot follow or unfollow him/herself. */
+		if (follower.getId( )== followee.getId()) {
+			throw new DatabaseRelatedException("A user cannot follow or unfollow him/herself.");
+		}
 		
 		/* Get the Following entity. */
 		Optional <Following> followingNullable = followingRepository.findByFollower_IdAndFollowee_Id(follower.getId(), followee.getId());
 		if (!followingNullable.isPresent()) {
-			throw new DatabaseRelatedException();
+			throw new DatabaseRelatedException("It is impossible to unfollow a user who has not been followed.");
 		}
 		Following following = followingNullable.get();
 		
