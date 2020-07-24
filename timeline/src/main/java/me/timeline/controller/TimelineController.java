@@ -49,5 +49,10 @@ public class TimelineController {
 	public FollowResponseDTO Follow(@RequestBody FollowRequestDTO followRequestDTO, @RequestHeader(name="Authorization") String jwtToken) {
 		return timelineService.Follow(followRequestDTO, jwtToken);
 	}
+	
+	@PostMapping(path="unfollow")
+	public FollowResponseDTO Unfollow(@RequestBody FollowRequestDTO followRequestDTO, @RequestHeader(name="Authorization") String jwtToken) {
+		return timelineService.Unfollow(followRequestDTO, jwtToken);
+	}
 }
 

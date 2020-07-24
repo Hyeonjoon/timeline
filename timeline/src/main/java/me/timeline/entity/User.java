@@ -93,11 +93,19 @@ public class User {
 		this.followingList.add(following);
 	}
 	
+	public void removeFollowing(Following following) {
+		this.followingList.remove(following);
+	}
+	
 	public void initFollowerList() {
 		this.followerList = new ArrayList<>();
 	}
 	
 	public void addFollower(Following following) {
 		this.followerList.add(following);
+	}
+	
+	public void removeFollower(Following following) {
+		this.followerList.remove(following);
 	}
 }

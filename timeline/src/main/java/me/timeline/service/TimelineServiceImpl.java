@@ -211,7 +211,7 @@ public class TimelineServiceImpl implements TimelineService {
 	/* PostComment
 	 * - Input: postCommentRequestDTO, jwtToken
 	 * - Output: postCommentResponseDTO
-	 * Retrieve user id from Jwt token and save the content in database.
+	 * Save the given comment for given writing in database.
 	 */
 	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken) {
@@ -252,6 +252,12 @@ public class TimelineServiceImpl implements TimelineService {
 		return postCommentResponseDTO;
 	}
 	
+	/* Follow
+	 * - Input: FollowRequestDTO, jwtToken
+	 * - Output: FollowResponseDTO
+	 * Save the information about following relationship,
+	 * more specifically, the information that the user described in jwtToken follows the user described in request DTO in database.
+	 */
 	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken) {
 		/* Create a new FollowResponseDTO object. */
@@ -280,6 +286,43 @@ public class TimelineServiceImpl implements TimelineService {
 		followingRepository.save(following);
 		
 		/* Construct the FollowResponseDTO object and return it. */
+		followResponseDTO.setSuccess(true);
+		
+		return followResponseDTO;
+	}
+	
+	/* Unfollow
+	 * - Input: FollowRequestDTO, jwtToken
+	 * - Output: FollowResponseDTO
+	 * Delete the following information from the database.
+	 */
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	public FollowResponseDTO Unfollow(FollowRequestDTO followRequestDTO, String jwtToken) {
+		/* Create a new FollowResponseDTO object. */
+		FollowResponseDTO followResponseDTO = new FollowResponseDTO();
+		
+		/* Get the User entities. */
+		Optional <User> followerNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		Optional <User> followeeNullable = userRepository.findById(followRequestDTO.getTargetId());
+		if (!followerNullable.isPresent() || !followeeNullable.isPresent()) {
+			throw new DatabaseRelatedException();
+		}
+		User follower = followerNullable.get();
+		User followee = followeeNullable.get();
+		
+		/* Get the Following entity. */
+		Optional <Following> followingNullable = followingRepository.findByFollower_IdAndFollowee_Id(follower.getId(), followee.getId());
+		if (!followingNullable.isPresent()) {
+			throw new DatabaseRelatedException();
+		}
+		Following following = followingNullable.get();
+		
+		/* Delete the following information. */
+		follower.removeFollowing(following);
+		followee.removeFollower(following);
+		followingRepository.delete(following);
+		
+		/* Construct the FollowResponseDTO and return it. */
 		followResponseDTO.setSuccess(true);
 		
 		return followResponseDTO;

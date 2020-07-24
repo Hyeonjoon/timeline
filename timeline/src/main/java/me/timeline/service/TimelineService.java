@@ -17,4 +17,5 @@ public interface TimelineService  {
 	public PostWritingResponseDTO PostWriting(PostWritingRequestDTO postWritingRequestDTO, String jwtToken);
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken);
 	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken);
+	public FollowResponseDTO Unfollow(FollowRequestDTO followRequestDTO, String jwtToken);
 }
