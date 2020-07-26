@@ -97,6 +97,10 @@ public class User {
 		this.followingList.remove(following);
 	}
 	
+	public List<Following> getFollowingList() {
+		return followingList;
+	}
+	
 	public void initFollowerList() {
 		this.followerList = new ArrayList<>();
 	}
@@ -107,5 +111,9 @@ public class User {
 	
 	public void removeFollower(Following following) {
 		this.followerList.remove(following);
+	}
+	
+	public List<Following> getFollowerList() {
+		return followerList;
 	}
 }

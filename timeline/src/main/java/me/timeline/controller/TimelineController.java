@@ -1,5 +1,7 @@
 package me.timeline.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import me.timeline.dto.FollowRequestDTO;
 import me.timeline.dto.FollowResponseDTO;
+import me.timeline.dto.FollowingInformationDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
 import me.timeline.dto.PostWritingRequestDTO;
@@ -53,6 +56,16 @@ public class TimelineController {
 	@PostMapping(path="unfollow")
 	public FollowResponseDTO Unfollow(@RequestBody FollowRequestDTO followRequestDTO, @RequestHeader(name="Authorization") String jwtToken) {
 		return timelineService.Unfollow(followRequestDTO, jwtToken);
+	}
+	
+	@GetMapping(path="getfollower")
+	public List<FollowingInformationDTO> GetFollower(@RequestHeader(name="Authorization")String jwtToken) {
+		return timelineService.GetFollower(jwtToken);
+	}
+	
+	@GetMapping(path="getfollowing")
+	public List<FollowingInformationDTO> GetFollowing(@RequestHeader(name="Authorization")String jwtToken) {
+		return timelineService.GetFollowing(jwtToken);
 	}
 }
 

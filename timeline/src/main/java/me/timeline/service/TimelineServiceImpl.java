@@ -1,7 +1,9 @@
 package me.timeline.service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import me.timeline.dto.FollowRequestDTO;
 import me.timeline.dto.FollowResponseDTO;
+import me.timeline.dto.FollowingInformationDTO;
 import me.timeline.dto.JwtInputDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
@@ -56,7 +59,7 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	JwtService jwtService;
-	
+		
 	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 	
 	/* SignUp
@@ -346,5 +349,65 @@ public class TimelineServiceImpl implements TimelineService {
 		followResponseDTO.setSuccess(true);
 		
 		return followResponseDTO;
+	}
+	
+	/* GetFollower
+	 * - Input: jwtToken
+	 * - Output: List<FollowingInformationDTO>
+	 * Get the list of informations of users who are following the user described in jwtToken.
+	 */
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	public List<FollowingInformationDTO> GetFollower(String jwtToken) {
+		/* Retrieve user id from Jwt token and get the User entity for that user id. */
+		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
+		}
+		User user = userNullable.get();
+		
+		/* Get a list of Following entities in which this user is a followee. */
+		List<Following> followerList = user.getFollowerList();
+		
+		/* Convert the list of Following entities into a list of User entities who are following this user. */
+		List<User> userList = followerList.stream()
+				.map(followingEntity -> followingEntity.getFollower())
+				.collect(Collectors.toList());
+		
+		/* Convert the list of User entities into a list of FollowingInformationDTOs and return it. */
+		List<FollowingInformationDTO> followingInformationDTOList = userList.stream()
+				.map(userEntity -> new FollowingInformationDTO(userEntity.getEmail(), userEntity.getNickname()))
+				.collect(Collectors.toList());
+		
+		return followingInformationDTOList;
+	}
+	
+	/* GetFollowing
+	 * - Input: jwtToken
+	 * - Output: List<FollowingInformationDTO>
+	 * Get the list of informations of users who are followed by the user described in jwtToken.
+	 */
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	public List<FollowingInformationDTO> GetFollowing(String jwtToken) {
+		/* Retrieve user id from Jwt token and get the User entity for that user id. */
+		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
+		}
+		User user = userNullable.get();
+		
+		/* Get a list of Following entities in which this user is a follower. */
+		List<Following> followingList = user.getFollowingList();
+		
+		/* Convert the list of Following entities into a list of User entities who are followed by this user. */
+		List<User> userList = followingList.stream()
+				.map(followingEntity -> followingEntity.getFollowee())
+				.collect(Collectors.toList());
+		
+		/* Convert the list of User entities into a list of FollowingInformationDTOs and return it. */
+		List<FollowingInformationDTO> followingInformationDTOList = userList.stream()
+				.map(userEntity -> new FollowingInformationDTO(userEntity.getEmail(), userEntity.getNickname()))
+				.collect(Collectors.toList());
+		
+		return followingInformationDTOList;
 	}
 }
