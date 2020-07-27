@@ -62,8 +62,9 @@ public class TimelineServiceImpl implements TimelineService {
 	
 	@Autowired
 	JwtService jwtService;
-		
-	private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
+	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
 	
 	/* SignUp
 	 * - Input: SignUpRequestDTO
