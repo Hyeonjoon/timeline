@@ -1,13 +1,23 @@
 package me.timeline.dto;
 
-public class FollowingInformationDTO {
+public class UserInformationDTO {
 	
+	private int id;
 	private String email;
 	private String nickname;
 	
-	public FollowingInformationDTO(String email, String nickname) {
+	public UserInformationDTO(int id, String email, String nickname) {
+		this.id = id;
 		this.email = email;
 		this.nickname = nickname;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public String getEmail() {

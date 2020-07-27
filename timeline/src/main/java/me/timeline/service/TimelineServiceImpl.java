@@ -1,5 +1,6 @@
 package me.timeline.service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -10,9 +11,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import me.timeline.dto.CommentInformationDTO;
 import me.timeline.dto.FollowRequestDTO;
 import me.timeline.dto.FollowResponseDTO;
-import me.timeline.dto.FollowingInformationDTO;
+import me.timeline.dto.UserInformationDTO;
+import me.timeline.dto.WritingInformationDTO;
 import me.timeline.dto.JwtInputDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
@@ -357,7 +360,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * Get the list of informations of users who are following the user described in jwtToken.
 	 */
 	@Transactional(rollbackFor = DatabaseRelatedException.class)
-	public List<FollowingInformationDTO> GetFollower(String jwtToken) {
+	public List<UserInformationDTO> GetFollower(String jwtToken) {
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		if (!userNullable.isPresent()) {
@@ -373,12 +376,12 @@ public class TimelineServiceImpl implements TimelineService {
 				.map(followingEntity -> followingEntity.getFollower())
 				.collect(Collectors.toList());
 		
-		/* Convert the list of User entities into a list of FollowingInformationDTOs and return it. */
-		List<FollowingInformationDTO> followingInformationDTOList = userList.stream()
-				.map(userEntity -> new FollowingInformationDTO(userEntity.getEmail(), userEntity.getNickname()))
+		/* Convert the list of User entities into a list of FollowingInformationDTO objects and return it. */
+		List<UserInformationDTO> userInformationDTOList = userList.stream()
+				.map(userEntity -> new UserInformationDTO(userEntity.getId(), userEntity.getEmail(), userEntity.getNickname()))
 				.collect(Collectors.toList());
 		
-		return followingInformationDTOList;
+		return userInformationDTOList;
 	}
 	
 	/* GetFollowing
@@ -387,7 +390,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * Get the list of informations of users who are followed by the user described in jwtToken.
 	 */
 	@Transactional(rollbackFor = DatabaseRelatedException.class)
-	public List<FollowingInformationDTO> GetFollowing(String jwtToken) {
+	public List<UserInformationDTO> GetFollowing(String jwtToken) {
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
 		if (!userNullable.isPresent()) {
@@ -403,11 +406,69 @@ public class TimelineServiceImpl implements TimelineService {
 				.map(followingEntity -> followingEntity.getFollowee())
 				.collect(Collectors.toList());
 		
-		/* Convert the list of User entities into a list of FollowingInformationDTOs and return it. */
-		List<FollowingInformationDTO> followingInformationDTOList = userList.stream()
-				.map(userEntity -> new FollowingInformationDTO(userEntity.getEmail(), userEntity.getNickname()))
+		/* Convert the list of User entities into a list of FollowingInformationDTO objects and return it. */
+		List<UserInformationDTO> userInformationDTOList = userList.stream()
+				.map(userEntity -> new UserInformationDTO(userEntity.getId(), userEntity.getEmail(), userEntity.getNickname()))
 				.collect(Collectors.toList());
 		
-		return followingInformationDTOList;
+		return userInformationDTOList;
+	}
+	
+	/* GetTimeline
+	 * - Input: jwtToken
+	 * - Output: List<WritingInformationDTO>
+	 * Return a list of WritingInformationDTOs posted by users who are followed by the user described in jwtToken.
+	 * The WritingInformationDTOs are sorted in descending order with the time they are created,
+	 * which means that they are listed from newest to oldest.
+	 * The lists of comments included in the WritingInformationDTOs(if exist) are sorted in ascending order.
+	 */
+	public List<WritingInformationDTO> GetTimeline(String jwtToken){
+		/* Retrieve user id from Jwt token and get the User entity for that user id. */
+		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is invalid. Please sign in again.");
+		}
+		User user = userNullable.get();
+		
+		/* Get a list of Following entities in which this user is a follower. */
+		List<Following> followingList = user.getFollowingList();
+		
+		/* Convert the list of Following entities into a list of User entities who are followed by this user. */
+		List<User> userList = followingList.stream()
+				.map(followingEntity -> followingEntity.getFollowee())
+				.collect(Collectors.toList());
+		
+		/* Convert the list of User entities into a list of lists which have Writing entities. */
+		List<List<Writing>> listOfWritingLists = userList.stream()
+				.map(userEntity -> userEntity.getWritingList())
+				.collect(Collectors.toList());
+		
+		/* Merge the lists of Writing entities. */
+		List<Writing> writingList = new ArrayList<>();
+		for (List<Writing> oneWritingList : listOfWritingLists) {
+			writingList.addAll(oneWritingList);
+		}
+		
+		/* Convert the list of Writing entities into a list of WritingInformationDTO objects. */
+		List<WritingInformationDTO> writingInformationDTOList =
+				writingList.stream()
+				.map(writingEntity -> new WritingInformationDTO(
+						writingEntity.getId(),
+						new UserInformationDTO(writingEntity.getUser().getId(), writingEntity.getUser().getEmail(), writingEntity.getUser().getNickname()),
+						writingEntity.getContent(),
+						writingEntity.getCreatedAt(),
+						writingEntity.getCommentList().stream()
+							.map(commentEntity -> new CommentInformationDTO(
+									commentEntity.getId(),
+									new UserInformationDTO(commentEntity.getUser().getId(), commentEntity.getUser().getEmail(), commentEntity.getUser().getNickname()),
+									commentEntity.getContent(),
+									commentEntity.getCreatedAt()))
+							.collect(Collectors.toList())))
+				.collect(Collectors.toList());
+		
+		/* Sort the list of WritingInformationDTO objects with 'createdAt' attribute as a key in descending order and return it. */
+		writingInformationDTOList.sort((writing1, writing2) -> writing2.getCreatedAt().compareTo(writing1.getCreatedAt()));
+		
+		return writingInformationDTOList;
 	}
 }

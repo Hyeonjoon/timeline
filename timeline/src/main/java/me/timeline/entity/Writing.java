@@ -12,6 +12,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -31,6 +32,7 @@ public class Writing {
 	private Date createdAt;
 	
 	@OneToMany(mappedBy = "writing")
+	@OrderBy("createdAt ASC")
 	private List<Comment> commentList;
 	
 	public int getId() {
@@ -71,5 +73,9 @@ public class Writing {
 	
 	public void addComment(Comment comment) {
 		this.commentList.add(comment);
+	}
+	
+	public List<Comment> getCommentList(){
+		return commentList;
 	}
 }

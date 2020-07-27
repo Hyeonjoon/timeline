@@ -77,6 +77,10 @@ public class User {
 		this.writingList.add(writing);
 	}
 	
+	public List<Writing> getWritingList() {
+		return writingList;
+	}
+	
 	public void initCommentList() {
 		this.commentList =new ArrayList<>();
 	}

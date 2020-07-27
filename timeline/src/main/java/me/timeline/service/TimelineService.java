@@ -4,7 +4,8 @@ import java.util.List;
 
 import me.timeline.dto.FollowRequestDTO;
 import me.timeline.dto.FollowResponseDTO;
-import me.timeline.dto.FollowingInformationDTO;
+import me.timeline.dto.UserInformationDTO;
+import me.timeline.dto.WritingInformationDTO;
 import me.timeline.dto.PostCommentRequestDTO;
 import me.timeline.dto.PostCommentResponseDTO;
 import me.timeline.dto.PostWritingRequestDTO;
@@ -21,6 +22,7 @@ public interface TimelineService  {
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken);
 	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken);
 	public FollowResponseDTO Unfollow(FollowRequestDTO followRequestDTO, String jwtToken);
-	public List<FollowingInformationDTO> GetFollower(String jwtToken);
-	public List<FollowingInformationDTO> GetFollowing(String jwtToken);
+	public List<UserInformationDTO> GetFollower(String jwtToken);
+	public List<UserInformationDTO> GetFollowing(String jwtToken);
+	public List<WritingInformationDTO> GetTimeline(String jwtToken);
 }
