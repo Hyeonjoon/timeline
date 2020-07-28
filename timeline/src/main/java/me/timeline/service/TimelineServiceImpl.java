@@ -167,6 +167,12 @@ public class TimelineServiceImpl implements TimelineService {
 		return signInResponseDTO;
 	}
 	
+	/* LinkAccount
+	 * - Input: SignUpRequestDTO, String jwtToken
+	 * - Output: SignUpResponseDTO
+	 * Create a SignatureInformation entity with a new Authorization Provider,
+	 * and link it with User entity with user id described in jwtToken.
+	 */
 	@Transactional(rollbackFor = DatabaseRelatedException.class)
 	public SignUpResponseDTO LinkAccount(SignUpRequestDTO signUpRequestDTO, String jwtToken) {
 		/* Create a new SignUpResponseDTO object. */
