@@ -100,7 +100,7 @@ public class TimelineServiceImpl implements TimelineService {
 		
 		/* Create a new SignatureInformation entity. */
 		SignatureInformation signatureInformation = new SignatureInformation();
-		signatureInformation.setProviderUserId(0);
+		signatureInformation.setProviderUserId(signUpRequestDTO.getProviderUserId());
 		signatureInformation.setPasskey(passwordEncoder.encode(signUpRequestDTO.getPassword()));
 		
 		/* Create some referential relationships among entities. */
@@ -165,6 +165,45 @@ public class TimelineServiceImpl implements TimelineService {
 		}
 		
 		return signInResponseDTO;
+	}
+	
+	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	public SignUpResponseDTO LinkAccount(SignUpRequestDTO signUpRequestDTO, String jwtToken) {
+		/* Create a new SignUpResponseDTO object. */
+		SignUpResponseDTO signUpResponseDTO = new SignUpResponseDTO();
+		
+		/* Get an User entity, and an AuthProvider entity with corresponding email, and provider type.
+		 * If there're no such entities, return the response.
+		 * We can ensure that an authProvider entity exists, because an user cannot set the provider type. */
+		Optional <User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
+		if (!userNullable.isPresent()) {
+			throw new DatabaseRelatedException("The user id retrieved from Jwt token is not valid.");
+		}
+		User user = userNullable.get();
+		AuthProvider authProvider = authProviderRepository.findByType(signUpRequestDTO.getProvider()).get();
+		
+		/* Check if this user already has a signature information with given authorization provider. */
+		boolean isAccountExists = signatureInformationRepository.existsByUser_IdAndAuthProvider_Id(user.getId(), authProvider.getId());
+		if (isAccountExists) {
+			throw new DatabaseRelatedException("The user account with given auth provider already exists.");
+		}
+		
+		/* Create a new SignatureInformation entity. */
+		SignatureInformation signatureInformation = new SignatureInformation();
+		signatureInformation.setProviderUserId(signUpRequestDTO.getProviderUserId());
+		signatureInformation.setPasskey(passwordEncoder.encode(signUpRequestDTO.getPassword()));
+		
+		/* Create some referential relationships among entities. */
+		signatureInformation.setUser(user);
+		signatureInformation.setAuthProvider(authProvider);
+		user.addSignatureInformation(signatureInformation);
+		authProvider.addSignatureInformation(signatureInformation);
+		
+		/* Save the data in database. */
+		signatureInformationRepository.save(signatureInformation);
+		
+		signUpResponseDTO.setSuccess(true);
+		return signUpResponseDTO;
 	}
 	
 	/* PostWriting
@@ -423,6 +462,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * which means that they are listed from newest to oldest.
 	 * The lists of comments included in the WritingInformationDTOs(if exist) are sorted in ascending order.
 	 */
+	@Transactional(readOnly = true)
 	public List<WritingInformationDTO> GetTimeline(String jwtToken){
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));

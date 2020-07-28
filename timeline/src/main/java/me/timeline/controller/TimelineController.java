@@ -39,6 +39,11 @@ public class TimelineController {
 		return timelineService.SignIn(signInRequestDTO);
 	}
 	
+	@PostMapping(path="/linkaccount")
+	public SignUpResponseDTO LinkAccount(@RequestBody SignUpRequestDTO signUpRequestDTO, @RequestHeader(name="Authorization") String jwtToken) {
+		return timelineService.LinkAccount(signUpRequestDTO, jwtToken);
+	}
+	
 	@PostMapping(path="/postwriting")
 	public PostWritingResponseDTO PostWriting(@RequestBody PostWritingRequestDTO postWritingRequestDTO, @RequestHeader (name="Authorization") String jwtToken) {
 		return timelineService.PostWriting(postWritingRequestDTO, jwtToken);
@@ -60,17 +65,17 @@ public class TimelineController {
 	}
 	
 	@GetMapping(path="getfollower")
-	public List<UserInformationDTO> GetFollower(@RequestHeader(name="Authorization")String jwtToken) {
+	public List<UserInformationDTO> GetFollower(@RequestHeader(name="Authorization") String jwtToken) {
 		return timelineService.GetFollower(jwtToken);
 	}
 	
 	@GetMapping(path="getfollowing")
-	public List<UserInformationDTO> GetFollowing(@RequestHeader(name="Authorization")String jwtToken) {
+	public List<UserInformationDTO> GetFollowing(@RequestHeader(name="Authorization") String jwtToken) {
 		return timelineService.GetFollowing(jwtToken);
 	}
 	
 	@GetMapping(path="gettimeline")
-	public List<WritingInformationDTO> GetTimeline(@RequestHeader(name="Authorization")String jwtToken){
+	public List<WritingInformationDTO> GetTimeline(@RequestHeader(name="Authorization") String jwtToken){
 		return timelineService.GetTimeline(jwtToken);
 	}
 }

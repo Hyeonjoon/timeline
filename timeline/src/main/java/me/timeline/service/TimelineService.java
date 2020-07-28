@@ -18,6 +18,7 @@ import me.timeline.dto.SignUpResponseDTO;
 public interface TimelineService  {
 	public SignUpResponseDTO SignUp(SignUpRequestDTO signUpRequestDTO);
 	public SignInResponseDTO SignIn(SignInRequestDTO signInRequestDTO);
+	public SignUpResponseDTO LinkAccount(SignUpRequestDTO signUpRequestDTO, String jwtToken);
 	public PostWritingResponseDTO PostWriting(PostWritingRequestDTO postWritingRequestDTO, String jwtToken);
 	public PostCommentResponseDTO PostComment(PostCommentRequestDTO postCommentRequestDTO, String jwtToken);
 	public FollowResponseDTO Follow(FollowRequestDTO followRequestDTO, String jwtToken);

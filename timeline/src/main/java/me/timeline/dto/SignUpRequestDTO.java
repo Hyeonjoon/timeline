@@ -5,6 +5,7 @@ public class SignUpRequestDTO {
 	private String nickname;
 	private String password;
 	private String provider;
+	private int providerUserId;
 	
 	
 	public String getEmail() {
@@ -37,5 +38,13 @@ public class SignUpRequestDTO {
 	
 	public void setProvider(String provider) {
 		this.provider = provider;
+	}
+	
+	public int getProviderUserId() {
+		return providerUserId;
+	}
+	
+	public void setProviderUserId(int providerUserId) {
+		this.providerUserId = providerUserId;
 	}
 }
