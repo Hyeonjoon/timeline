@@ -4,6 +4,14 @@ public class FollowRequestDTO {
 	
 	private int targetId;
 	
+	public FollowRequestDTO(int targetId) {
+		this.targetId = targetId;
+	}
+	
+	public FollowRequestDTO() {
+		
+	}
+	
 	public int getTargetId() {
 		return targetId;
 	}

@@ -5,6 +5,15 @@ public class PostCommentRequestDTO {
 	private int writingId;
 	private String content;
 	
+	public PostCommentRequestDTO(int writingId, String content) {
+		this.writingId = writingId;
+		this.content = content;
+	}
+	
+	public PostCommentRequestDTO() {
+		
+	}
+	
 	public int getWritingId() {
 		return writingId;
 	}

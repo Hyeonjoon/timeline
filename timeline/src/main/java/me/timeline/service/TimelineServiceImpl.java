@@ -144,7 +144,7 @@ public class TimelineServiceImpl implements TimelineService {
 		Optional<User> userNullable = userRepository.findByEmail(signInRequestDTO.getEmail());
 		if (!userNullable.isPresent()) {
 			signInResponseDTO.setSuccess(false);
-			signInResponseDTO.setJwtToken("");
+			signInResponseDTO.setJwtToken(null);
 			return signInResponseDTO;
 		}
 		User user = userNullable.get();
@@ -155,7 +155,7 @@ public class TimelineServiceImpl implements TimelineService {
 		Optional<SignatureInformation> signatureInformationNullable = signatureInformationRepository.findByUser_IdAndAuthProvider_Id(user.getId(), authProvider.getId());
 		if (!signatureInformationNullable.isPresent()) {
 			signInResponseDTO.setSuccess(false);
-			signInResponseDTO.setJwtToken("");
+			signInResponseDTO.setJwtToken(null);
 			return signInResponseDTO;
 		}
 		SignatureInformation signatureInformation = signatureInformationNullable.get();
@@ -170,7 +170,7 @@ public class TimelineServiceImpl implements TimelineService {
 		}
 		else {
 			signInResponseDTO.setSuccess(false);
-			signInResponseDTO.setJwtToken("");
+			signInResponseDTO.setJwtToken(null);
 		}
 		
 		return signInResponseDTO;
@@ -343,6 +343,12 @@ public class TimelineServiceImpl implements TimelineService {
 		/* A user cannot follow or unfollow him/herself. */
 		if (follower.getId( ) == followee.getId()) {
 			throw new DatabaseRelatedException("A user cannot follow or unfollow him/herself.");
+		}
+		
+		/* A user cannot follow a user who already following. */
+		boolean isAlreadyFollowing = followingRepository.existsByFollower_IdAndFollowee_Id(follower.getId(), followee.getId());
+		if (isAlreadyFollowing) {
+			throw new DatabaseRelatedException("A user cannot follow a user who already following.");
 		}
 		
 		/* Create a new Following entity. */

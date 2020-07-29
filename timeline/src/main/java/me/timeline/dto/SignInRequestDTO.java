@@ -5,6 +5,16 @@ public class SignInRequestDTO {
 	private String password;
 	private String provider;
 	
+	public SignInRequestDTO(String email, String password, String provider) {
+		this.email = email;
+		this.password = password;
+		this.provider = provider;
+	}
+	
+	public SignInRequestDTO() {
+		
+	}
+	
 	public String getEmail() {
 		return email;
 	}
