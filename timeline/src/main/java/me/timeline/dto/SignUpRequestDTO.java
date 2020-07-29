@@ -7,6 +7,17 @@ public class SignUpRequestDTO {
 	private String provider;
 	private int providerUserId;
 	
+	public SignUpRequestDTO() {
+		
+	}
+	
+	public SignUpRequestDTO(String email, String nickname, String password, String provider, int providerUserId) {
+		this.email = email;
+		this.nickname = nickname;
+		this.password = password;
+		this.provider = provider;
+		this.providerUserId = providerUserId;
+	}
 	
 	public String getEmail() {
 		return email;

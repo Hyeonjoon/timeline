@@ -77,10 +77,19 @@ public class TimelineServiceImpl implements TimelineService {
 		/* Create a SignUpResponseDTO object. */
 		SignUpResponseDTO signUpResponseDTO = new SignUpResponseDTO();
 		
-		/* Check if given email address is already exists in database. */
+		/* Check if given email address already exists in database. */
 		boolean isEmailDuplicated = userRepository.existsByEmail(signUpRequestDTO.getEmail());
 		if (isEmailDuplicated) {
 			signUpResponseDTO.setSuccess(false);
+			signUpResponseDTO.setMessage("Given email is duplicated. If you want to link your accounts, sign in and try linking account.");
+			return signUpResponseDTO;
+		}
+		
+		/* Check if given nickname already exists in database. */
+		boolean isNicknameDuplicated = userRepository.existsByNickname(signUpRequestDTO.getNickname());
+		if (isNicknameDuplicated) {
+			signUpResponseDTO.setSuccess(false);
+			signUpResponseDTO.setMessage("Given nickname is duplicated.");
 			return signUpResponseDTO;
 		}
 		

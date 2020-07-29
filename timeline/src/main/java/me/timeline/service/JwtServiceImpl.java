@@ -21,7 +21,7 @@ public class JwtServiceImpl implements JwtService{
 		String jwt = Jwts.builder()
 						 .setHeaderParam("typ", "JWT")
 						 .setSubject(jwtInputDTO.getIdString())
-						 .signWith(SignatureAlgorithm.HS512, secret)
+						 .signWith(SignatureAlgorithm.HS256, secret)
 						 .compact();
 		return jwt;
 	}
@@ -29,6 +29,7 @@ public class JwtServiceImpl implements JwtService{
 	@Override
 	public boolean JwtIsUsable(String jwt) {
 		try {
+			@SuppressWarnings("unused")
 			Jws<Claims> claims = Jwts.parser()
 					  .setSigningKey(secret)
 					  .parseClaimsJws(jwt);

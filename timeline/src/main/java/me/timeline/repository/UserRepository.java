@@ -8,5 +8,6 @@ import me.timeline.entity.User;
 
 public interface UserRepository extends CrudRepository<User, Integer>{
 	public boolean existsByEmail(String email);
+	public boolean existsByNickname(String nickname);
 	public Optional<User> findByEmail(String email);
 }

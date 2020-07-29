@@ -1,0 +1,1 @@
+INSERT INTO Auth_Provider VALUES (1, "None"), (2, "Facebook");
