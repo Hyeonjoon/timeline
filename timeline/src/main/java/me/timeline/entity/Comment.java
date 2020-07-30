@@ -2,6 +2,7 @@ package me.timeline.entity;
 
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -16,6 +17,7 @@ import javax.persistence.TemporalType;
 public class Comment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
 	private int id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -26,6 +28,7 @@ public class Comment {
 	@JoinColumn(name = "writing_id")
 	private Writing writing;
 	
+	@Column(columnDefinition = "TEXT")
 	private String content;
 	
 	@Temporal(TemporalType.TIMESTAMP)

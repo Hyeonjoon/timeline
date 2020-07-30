@@ -1,5 +1,6 @@
 package me.timeline.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -15,6 +16,7 @@ import javax.persistence.UniqueConstraint;
 public class Following {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
 	private int id;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

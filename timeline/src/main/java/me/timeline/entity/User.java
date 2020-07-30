@@ -15,12 +15,13 @@ import javax.persistence.OneToMany;
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
 	private int id;
 	
-	@Column(unique = true)
+	@Column(unique = true, nullable = false, length = 320)
 	private String email;
 	
-	@Column(unique = true)
+	@Column(unique = true, nullable = false, columnDefinition = "CHAR(32)")
 	private String nickname;
 	
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

@@ -203,6 +203,14 @@ public class TimelineServiceImpl implements TimelineService {
 			throw new DatabaseRelatedException("The user account with given auth provider already exists.");
 		}
 		
+		/* Check if the email described in SignUpRequestDTO equals to email of existing user information.
+		 * They should equal to each other. */
+		if (!signUpRequestDTO.getEmail().equals(user.getEmail())) {
+			signUpResponseDTO.setSuccess(false);
+			signUpResponseDTO.setMessage("New account should have same email with existing account's.");
+			return signUpResponseDTO;
+		}
+		
 		/* Create a new SignatureInformation entity. */
 		SignatureInformation signatureInformation = new SignatureInformation();
 		signatureInformation.setProviderUserId(signUpRequestDTO.getProviderUserId());

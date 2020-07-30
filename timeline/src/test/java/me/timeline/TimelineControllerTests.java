@@ -29,7 +29,7 @@ import me.timeline.dto.SignUpRequestDTO;
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TimelineControllerTest {
+public class TimelineControllerTests {
 	@Autowired
 	TimelineController timelineController;
 	

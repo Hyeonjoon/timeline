@@ -1,5 +1,6 @@
 package me.timeline.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,10 +13,12 @@ import javax.persistence.ManyToOne;
 public class SignatureInformation {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(nullable = false)
 	private int id;
 	
 	private int providerUserId;
 	
+	@Column(columnDefinition = "TEXT")
 	private String passkey;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
