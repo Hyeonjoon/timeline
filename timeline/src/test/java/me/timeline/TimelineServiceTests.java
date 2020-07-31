@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import me.timeline.dto.CommentInformationDTO;
 import me.timeline.dto.ExceptionDTO;
 import me.timeline.dto.FollowRequestDTO;
 import me.timeline.dto.FollowResponseDTO;
@@ -29,6 +30,7 @@ import me.timeline.dto.SignInResponseDTO;
 import me.timeline.dto.SignUpRequestDTO;
 import me.timeline.dto.SignUpResponseDTO;
 import me.timeline.dto.UserInformationDTO;
+import me.timeline.dto.WritingInformationDTO;
 import me.timeline.entity.AuthProvider;
 import me.timeline.entity.SignatureInformation;
 import me.timeline.entity.User;
@@ -448,18 +450,44 @@ public class TimelineServiceTests {
 	@Test
 	@Order(9)
 	public void GetFollowingTest() throws Exception {
-		/* First create a sign up data for test. */
+		/* First create some sign up data for test. */
 		SignUpRequestDTO signUpRequestDTO = new SignUpRequestDTO("Test@test.com", "TEST", "TestPassword", "None", 0);
+		SignUpRequestDTO signUpRequestDTO2 = new SignUpRequestDTO("Test2@test.com", "TEST2", "TestPassword2", "None", 0);
+		SignUpRequestDTO signUpRequestDTO3 = new SignUpRequestDTO("Test3@test.com", "TEST3", "TestPassword3", "None", 0);
 		timelineService.SignUp(signUpRequestDTO);
+		timelineService.SignUp(signUpRequestDTO2);
+		timelineService.SignUp(signUpRequestDTO3);
 		
-		/* Get a jwtToken through SignIn for test. */
+		/* Get a jwtTokens through SignIn for test. */
 		String jwtToken = timelineService.SignIn(new SignInRequestDTO("Test@test.com", "TestPassword", "None")).getJwtToken();
 		
-		/* Create test data and expected results. */
+		/* Get the Users' data. */
+		User user2 = userRepository.findByEmail(signUpRequestDTO2.getEmail()).get();
+		User user3 = userRepository.findByEmail(signUpRequestDTO3.getEmail()).get();
 		
-		/* Check if responses are as expected. */
+		/* Create some following data for test. */
+		FollowRequestDTO followRequestDTO = new FollowRequestDTO(user2.getId());
+		FollowRequestDTO followRequestDTO2 = new FollowRequestDTO(user3.getId());
+		timelineService.Follow(followRequestDTO, jwtToken);
+		timelineService.Follow(followRequestDTO2, jwtToken);
 		
-		/* Check if data are stored in database or rejected well. */
+		/* Create expected results. */
+		List<UserInformationDTO> expectedList = new ArrayList<>();
+		expectedList.add(new UserInformationDTO(user2.getId(), user2.getEmail(), user2.getNickname()));
+		expectedList.add(new UserInformationDTO(user3.getId(), user3.getEmail(), user3.getNickname()));
+		expectedList.sort((userInformationDTO1, userInformationDTO2) -> Integer.compare(userInformationDTO1.getId(), userInformationDTO2.getId()));
+
+		
+		/* Check if response is same as expected. */
+		List<UserInformationDTO> resultList = timelineService.GetFollowing(jwtToken);
+		resultList.sort((userInformationDTO1, userInformationDTO2) -> Integer.compare(userInformationDTO1.getId(), userInformationDTO2.getId()));
+		
+		assertThat(resultList.size(), is(expectedList.size()));
+		for (int i = 0; i < resultList.size(); i++) {
+			assertThat(resultList.get(i).getId(), is(expectedList.get(i).getId()));
+			assertThat(resultList.get(i).getEmail(), is(expectedList.get(i).getEmail()));
+			assertThat(resultList.get(i).getNickname(), is(expectedList.get(i).getNickname()));
+		}
 	}
 	
 	/*
@@ -468,17 +496,122 @@ public class TimelineServiceTests {
 	@Test
 	@Order(10)
 	public void GetTimelineTest() throws Exception {
-		/* First create a sign up data for test. */
+		/* First create some sign up data for test. */
 		SignUpRequestDTO signUpRequestDTO = new SignUpRequestDTO("Test@test.com", "TEST", "TestPassword", "None", 0);
+		SignUpRequestDTO signUpRequestDTO2 = new SignUpRequestDTO("Test2@test.com", "TEST2", "TestPassword2", "None", 0);
+		SignUpRequestDTO signUpRequestDTO3 = new SignUpRequestDTO("Test3@test.com", "TEST3", "TestPassword3", "None", 0);
 		timelineService.SignUp(signUpRequestDTO);
+		timelineService.SignUp(signUpRequestDTO2);
+		timelineService.SignUp(signUpRequestDTO3);
 		
-		/* Get a jwtToken through SignIn for test. */
+		/* Get a jwtTokens through SignIn for test. */
 		String jwtToken = timelineService.SignIn(new SignInRequestDTO("Test@test.com", "TestPassword", "None")).getJwtToken();
+		String jwtToken2 = timelineService.SignIn(new SignInRequestDTO("Test2@test.com", "TestPassword2", "None")).getJwtToken();
+		String jwtToken3 = timelineService.SignIn(new SignInRequestDTO("Test3@test.com", "TestPassword3", "None")).getJwtToken();
 		
-		/* Create test data and expected results. */
+		/* Get the Users' data. */
+		User user = userRepository.findByEmail(signUpRequestDTO.getEmail()).get();
+		User user2 = userRepository.findByEmail(signUpRequestDTO2.getEmail()).get();
+		User user3 = userRepository.findByEmail(signUpRequestDTO3.getEmail()).get();
 		
-		/* Check if responses are as expected. */
+		/* Create some following data for test. */
+		FollowRequestDTO followRequestDTO = new FollowRequestDTO(user2.getId());
+		FollowRequestDTO followRequestDTO2 = new FollowRequestDTO(user3.getId());
+		timelineService.Follow(followRequestDTO, jwtToken);
+		timelineService.Follow(followRequestDTO2, jwtToken);
 		
-		/* Check if data are stored in database or rejected well. */
+		/* Create some writing data for test. */
+		PostWritingRequestDTO postWritingRequestDTO = new PostWritingRequestDTO("User#2, Writing #1.");
+		PostWritingRequestDTO postWritingRequestDTO2 = new PostWritingRequestDTO("User#2, Writing #2.");
+		PostWritingRequestDTO postWritingRequestDTO3 = new PostWritingRequestDTO("User#3, Writing #1.");
+		PostWritingResponseDTO postWritingResponseDTO = timelineService.PostWriting(postWritingRequestDTO, jwtToken2);
+		PostWritingResponseDTO postWritingResponseDTO2 = timelineService.PostWriting(postWritingRequestDTO2, jwtToken2);
+		PostWritingResponseDTO postWritingResponseDTO3 = timelineService.PostWriting(postWritingRequestDTO3, jwtToken3);
+		
+		/* Create some comment data for test. */
+		PostCommentRequestDTO postCommentRequestDTO = new PostCommentRequestDTO(1, "For User#2, Writing#1, Comment #1 by User#1.");
+		PostCommentRequestDTO postCommentRequestDTO2 = new PostCommentRequestDTO(1, "For User#2, Writing#1, Comment #2 by User#2.");
+		PostCommentRequestDTO postCommentRequestDTO3 = new PostCommentRequestDTO(3, "For User#3, Writing#1, Comment #1. by User#2.");
+		PostCommentResponseDTO postCommentResponseDTO = timelineService.PostComment(postCommentRequestDTO, jwtToken);
+		PostCommentResponseDTO postCommentResponseDTO2 = timelineService.PostComment(postCommentRequestDTO2, jwtToken2);
+		PostCommentResponseDTO postCommentResponseDTO3 = timelineService.PostComment(postCommentRequestDTO3, jwtToken2);
+		
+		/* Create expected results. */
+		List<CommentInformationDTO> commentList = new ArrayList<>();
+		List<CommentInformationDTO> commentList2 = new ArrayList<>();
+		List<CommentInformationDTO> commentList3 = new ArrayList<>();
+		commentList.add(new CommentInformationDTO(
+				1,
+				new UserInformationDTO(user.getId(), user.getEmail(), user.getNickname()),
+				postCommentResponseDTO.getContent(),
+				postCommentResponseDTO.getPostTime()));
+		commentList.add(new CommentInformationDTO(
+				2,
+				new UserInformationDTO(user2.getId(), user2.getEmail(), user2.getNickname()),
+				postCommentResponseDTO2.getContent(),
+				postCommentResponseDTO2.getPostTime()));
+		commentList3.add(new CommentInformationDTO(
+				3,
+				new UserInformationDTO(user2.getId(), user2.getEmail(), user2.getNickname()),
+				postCommentResponseDTO3.getContent(),
+				postCommentResponseDTO3.getPostTime()));
+		
+		commentList.sort((comment1, comment2) -> comment1.getCreatedAt().compareTo(comment2.getCreatedAt()));
+		commentList2.sort((comment1, comment2) -> comment1.getCreatedAt().compareTo(comment2.getCreatedAt()));
+		commentList3.sort((comment1, comment2) -> comment1.getCreatedAt().compareTo(comment2.getCreatedAt()));
+		
+		List<WritingInformationDTO> expectedList = new ArrayList<>();
+		expectedList.add(new WritingInformationDTO(
+				1,
+				new UserInformationDTO(user2.getId(), user2.getEmail(), user2.getNickname()),
+				postWritingResponseDTO.getContent(),
+				postWritingResponseDTO.getPostTime(),
+				commentList
+				));
+		expectedList.add(new WritingInformationDTO(
+				2,
+				new UserInformationDTO(user2.getId(), user2.getEmail(), user2.getNickname()),
+				postWritingResponseDTO2.getContent(),
+				postWritingResponseDTO2.getPostTime(),
+				commentList2
+				));
+		expectedList.add(new WritingInformationDTO(
+				3,
+				new UserInformationDTO(user3.getId(), user3.getEmail(), user3.getNickname()),
+				postWritingResponseDTO3.getContent(),
+				postWritingResponseDTO3.getPostTime(),
+				commentList3
+				));
+		
+		expectedList.sort((writing1, writing2) -> writing2.getCreatedAt().compareTo(writing1.getCreatedAt()));
+		
+		/* Check if response is same as expected. */
+		List<WritingInformationDTO> resultList = timelineService.GetTimeline(jwtToken);
+		
+		assertThat(resultList.size(), is(expectedList.size()));
+		for (int i = 0; i < resultList.size(); i++) {
+			assertThat(resultList.get(i).getId(), is(expectedList.get(i).getId()));
+			assertThat(resultList.get(i).getContent(), is(expectedList.get(i).getContent()));
+			
+			UserInformationDTO resultWritingUserInformationDTO = resultList.get(i).getUserInformationDTO();
+			UserInformationDTO expectedWritingUserInformationDTO = expectedList.get(i).getUserInformationDTO();
+			assertThat(resultWritingUserInformationDTO.getId(), is(expectedWritingUserInformationDTO.getId()));
+			assertThat(resultWritingUserInformationDTO.getEmail(), is(expectedWritingUserInformationDTO.getEmail()));
+			assertThat(resultWritingUserInformationDTO.getNickname(), is(expectedWritingUserInformationDTO.getNickname()));
+			
+			List<CommentInformationDTO> resultCommentList = resultList.get(i).getCommentInformationDTOList();
+			List<CommentInformationDTO> expectedCommentList = expectedList.get(i).getCommentInformationDTOList();
+			assertThat(resultCommentList.size(), is(expectedCommentList.size()));
+			for (int j = 0; j < resultCommentList.size(); j++) {
+				assertThat(resultCommentList.get(j).getId(), is(expectedCommentList.get(j).getId()));
+				assertThat(resultCommentList.get(j).getContent(), is(expectedCommentList.get(j).getContent()));
+				
+				UserInformationDTO resultCommentUserInformationDTO = resultCommentList.get(j).getUserInformationDTO();
+				UserInformationDTO expectedCommentUserInformationDTO = expectedCommentList.get(j).getUserInformationDTO();
+				assertThat(resultCommentUserInformationDTO.getId(), is(expectedCommentUserInformationDTO.getId()));
+				assertThat(resultCommentUserInformationDTO.getEmail(), is(expectedCommentUserInformationDTO.getEmail()));
+				assertThat(resultCommentUserInformationDTO.getNickname(), is(expectedCommentUserInformationDTO.getNickname()));
+			}
+		}
 	}
 }
