@@ -4,6 +4,15 @@ public class SignInResponseDTO {
 	private boolean success;
 	private String jwtToken;
 	
+	public SignInResponseDTO(boolean success, String jwtToken) {
+		this.success = success;
+		this.jwtToken = jwtToken;
+	}
+	
+	public SignInResponseDTO() {
+		
+	}
+	
 	public boolean getSuccess() {
 		return success;
 	}

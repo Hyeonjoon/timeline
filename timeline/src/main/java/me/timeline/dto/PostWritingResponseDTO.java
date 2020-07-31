@@ -8,6 +8,16 @@ public class PostWritingResponseDTO {
 	private String content;
 	private Date postTime;
 	
+	public PostWritingResponseDTO(boolean success, String content, Date postTime) {
+		this.success = success;
+		this.content = content;
+		this.postTime = postTime;
+	}
+	
+	public PostWritingResponseDTO() {
+		
+	}
+	
 	public boolean getSuccess() {
 		return success;
 	}

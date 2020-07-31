@@ -9,6 +9,17 @@ public class PostCommentResponseDTO {
 	private String content;
 	private Date postTime;
 	
+	public PostCommentResponseDTO(boolean success, int writingId, String content, Date postTime) {
+		this.success = success;
+		this.writingId = writingId;
+		this.content = content;
+		this.postTime = postTime;
+	}
+	
+	public PostCommentResponseDTO() {
+		
+	}
+	
 	public boolean getSuccess() {
 		return success;
 	}

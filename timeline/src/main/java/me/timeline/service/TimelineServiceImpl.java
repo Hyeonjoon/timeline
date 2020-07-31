@@ -428,7 +428,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * - Output: List<FollowingInformationDTO>
 	 * Get the list of informations of users who are following the user described in jwtToken.
 	 */
-	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	@Transactional(rollbackFor = DatabaseRelatedException.class, readOnly = true)
 	public List<UserInformationDTO> GetFollower(String jwtToken) {
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
@@ -458,7 +458,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * - Output: List<FollowingInformationDTO>
 	 * Get the list of informations of users who are followed by the user described in jwtToken.
 	 */
-	@Transactional(rollbackFor = DatabaseRelatedException.class)
+	@Transactional(rollbackFor = DatabaseRelatedException.class, readOnly = true)
 	public List<UserInformationDTO> GetFollowing(String jwtToken) {
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));
@@ -491,7 +491,7 @@ public class TimelineServiceImpl implements TimelineService {
 	 * which means that they are listed from newest to oldest.
 	 * The lists of comments included in the WritingInformationDTOs(if exist) are sorted in ascending order.
 	 */
-	@Transactional(readOnly = true)
+	@Transactional(rollbackFor = DatabaseRelatedException.class, readOnly = true)
 	public List<WritingInformationDTO> GetTimeline(String jwtToken){
 		/* Retrieve user id from Jwt token and get the User entity for that user id. */
 		Optional<User> userNullable = userRepository.findById(jwtService.JwtGetUserId(jwtToken));

@@ -5,6 +5,16 @@ public class ExceptionDTO {
 	private String exception;
 	private String message;
 	
+	public ExceptionDTO(int status, String exception, String message) {
+		this.status = status;
+		this.exception = exception;
+		this.message = message;
+	}
+	
+	public ExceptionDTO() {
+		
+	}
+	
 	public int getStatus() {
 		return status;
 	}
